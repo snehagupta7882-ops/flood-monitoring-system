@@ -32,7 +32,5 @@ This project is an IoT-based Smart Flood Monitoring System developed using Ardui
 - Flood_Monitoring_System_Documentation.pdf
 
 ## Future Scope
-- ESP32 implementation
-- Cloud data logging
 - SMS/Email alerts
 - AI-based flood prediction
