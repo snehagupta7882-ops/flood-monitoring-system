@@ -19,11 +19,11 @@ This project is an IoT-based Smart flood Monitoring System developed using Ardui
 - Buzzer
 - Blynk IoT Platform
 
-## Software Used
+## Software used
 - Arduino IDE
 - Wokwi Simulator
 - Blynk IoT
-- VS Code
+- VS code
 
 ## Files Included
 - sketch.ino
