@@ -7,7 +7,7 @@ This project is an IoT-based Smart flood Monitoring System developed using Ardui
 - Real-time water level monitoring
 - OLED display for live status
 - LED and buzzer alerts
-- Blynk cloud monitoring
+- Blynk cloud monitoring 
 - Wokwi simulation
 
 ## Components Used
