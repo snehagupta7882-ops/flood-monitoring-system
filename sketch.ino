@@ -23,7 +23,7 @@ DHT dht(DHTPIN, DHTTYPE);
 char ssid[] = "Wokwi-GUEST";
 char pass[] = "";
 
-bool alertSent = false;
+bool alertsend = false;
 void setup() {
 
   Serial.begin(115200);
