@@ -25,7 +25,7 @@ This project is an IoT-based Smart flood Monitoring System developed using Ardui
 - Blynk IoT
 - VS code
 
-## Files Included
+## Files Include
 - sketch.ino
 - diagram.json
 - libraries.txt
