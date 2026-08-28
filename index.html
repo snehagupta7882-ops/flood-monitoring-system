@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FloodGuard | Smart Flood Monitoring</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --black: #050505;
+            --black-light: #0c0c0f;
+            --card: #111114;
+            --card-light: #18181d;
+
+            --pink: #ff1493;
+            --pink-light: #ff4db8;
+
+            --blue: #3b82f6;
+            --green: #22c55e;
+            --sky: #38bdf8;
+            --red: #ef4444;
+            --yellow: #facc15;
+
+            --white: #ffffff;
+            --muted: #9696a0;
+            --border: #24242a;
+        }
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        body {
+            font-family: "Inter", sans-serif;
+            background: var(--black);
+            color: var(--white);
+        }
+
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+
+            width: 250px;
+            height: 100vh;
+
+            background: #080809;
+            border-right: 1px solid var(--border);
+
+            padding: 28px 18px;
+
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            padding: 0 10px 30px;
+        }
+
+
+        .logo-icon {
+            width: 43px;
+            height: 43px;
+
+            background: var(--pink);
+            border-radius: 12px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 21px;
+        }
+
+
+        .logo h2 {
+            font-size: 18px;
+            margin-bottom: 3px;
+        }
+
+
+        .logo span {
+            color: var(--muted);
+            font-size: 8px;
+            letter-spacing: 1.5px;
+        }
+
+
+        .navigation {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+
+        .nav-item {
+            text-decoration: none;
+            color: var(--muted);
+
+            padding: 13px 15px;
+            border-radius: 9px;
+
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+
+        .nav-item:hover {
+            background: var(--card);
+            color: white;
+        }
+
+
+        .nav-item.active {
+            background: rgba(255, 20, 147, 0.13);
+            color: var(--pink-light);
+
+            border-left: 3px solid var(--pink);
+        }
+
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+
+        .connection-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+            padding: 14px;
+
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+
+        .connection-box strong {
+            display: block;
+            font-size: 11px;
+        }
+
+
+        .connection-box small {
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+
+        .online-dot {
+            width: 9px;
+            height: 9px;
+
+            background: var(--green);
+            border-radius: 50%;
+
+            box-shadow: 0 0 10px var(--green);
+        }
+
+
+        /* ================= MAIN ================= */
+
+        .main-content {
+            margin-left: 250px;
+            padding: 35px 40px;
+
+            min-height: 100vh;
+        }
+
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+
+            margin-bottom: 28px;
+        }
+
+
+        .small-title {
+            color: var(--pink);
+
+            font-size: 9px;
+            font-weight: 700;
+
+            letter-spacing: 2px;
+        }
+
+
+        .topbar h1 {
+            margin-top: 7px;
+            font-size: 29px;
+        }
+
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+
+        .last-update {
+            color: var(--green);
+
+            font-size: 11px;
+            font-weight: 600;
+
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+
+        .pulse {
+            width: 7px;
+            height: 7px;
+
+            background: var(--green);
+            border-radius: 50%;
+
+            box-shadow: 0 0 8px var(--green);
+        }
+
+
+        .time-box {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+
+        .time-box strong {
+            color: white;
+            margin-left: 4px;
+        }
+
+
+        /* ================= FLOOD STATUS ================= */
+
+        .danger-banner {
+            background: linear-gradient(90deg,
+                    rgba(255, 20, 147, 0.16),
+                    rgba(239, 68, 68, 0.08));
+
+            border: 1px solid rgba(255, 20, 147, 0.35);
+
+            border-radius: 14px;
+            padding: 20px 24px;
+
+            display: flex;
+            align-items: center;
+            gap: 18px;
+
+            margin-bottom: 30px;
+        }
+
+
+        .danger-icon {
+            width: 44px;
+            height: 44px;
+
+            border-radius: 50%;
+
+            background: var(--red);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+
+        .danger-label {
+            color: var(--muted);
+
+            font-size: 8px;
+            letter-spacing: 1.5px;
+        }
+
+
+        .danger-content h2 {
+            color: var(--pink-light);
+
+            font-size: 21px;
+            margin: 3px 0;
+        }
+
+
+        .danger-content p {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+
+        .threshold-info {
+            margin-left: auto;
+            text-align: right;
+        }
+
+
+        .threshold-info span {
+            display: block;
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+
+        .threshold-info strong {
+            color: var(--red);
+            font-size: 21px;
+        }
+
+
+        /* ================= SECTION ================= */
+
+        .section-heading {
+            margin-bottom: 14px;
+        }
+
+
+        .section-heading span {
+            color: var(--pink);
+
+            font-size: 9px;
+            font-weight: 700;
+
+            letter-spacing: 2px;
+        }
+
+
+        .section-heading h2 {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+
+
+        /* ================= SENSOR CARDS ================= */
+
+        .sensor-grid {
+            display: grid;
+
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+
+        .sensor-card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 20px;
+
+            min-height: 185px;
+
+            transition: 0.2s;
+        }
+
+
+        .sensor-card:hover {
+            border-color: #3b3b43;
+            transform: translateY(-2px);
+        }
+
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        .sensor-icon {
+            width: 42px;
+            height: 42px;
+
+            border-radius: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 19px;
+        }
+
+
+        .water-icon {
+            background: rgba(56, 189, 248, 0.13);
+        }
+
+
+        .temp-icon {
+            background: rgba(250, 204, 21, 0.13);
+        }
+
+
+        .humidity-icon {
+            background: rgba(59, 130, 246, 0.13);
+        }
+
+
+        .card-status {
+            color: var(--green);
+
+            font-size: 8px;
+            font-weight: 700;
+
+            letter-spacing: 1px;
+        }
+
+
+        .sensor-info {
+            margin-top: 17px;
+        }
+
+
+        .sensor-info p {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+
+        .sensor-info h3 {
+            margin-top: 5px;
+            font-size: 31px;
+        }
+
+
+        .sensor-info small {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+
+        /* WATER PROGRESS */
+
+        .progress-container {
+            height: 6px;
+
+            background: #29292e;
+
+            border-radius: 10px;
+
+            margin-top: 17px;
+
+            overflow: hidden;
+        }
+
+
+        .progress-bar {
+            height: 100%;
+
+            width: 0%;
+
+            background: var(--pink);
+
+            border-radius: 10px;
+
+            transition: width 0.5s;
+        }
+
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+
+            margin-top: 9px;
+
+            color: var(--muted);
+            font-size: 8px;
+        }
+
+
+        .mini-line {
+            margin-top: 30px;
+
+            color: var(--yellow);
+
+            font-size: 9px;
+        }
+
+
+        .humidity-bar {
+            height: 6px;
+
+            background: #29292e;
+
+            border-radius: 10px;
+
+            margin-top: 30px;
+
+            overflow: hidden;
+        }
+
+
+        .humidity-fill {
+            width: 0%;
+
+            height: 100%;
+
+            background: var(--blue);
+
+            border-radius: 10px;
+
+            transition: width 0.5s;
+        }
+
+
+        /* ================= CHART + SYSTEM ================= */
+
+        .dashboard-grid {
+            display: grid;
+
+            grid-template-columns: 2fr 1fr;
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .chart-card,
+        .system-card,
+        .alert-card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+
+            border-radius: 14px;
+
+            padding: 22px;
+        }
+
+
+        .chart-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+        }
+
+
+        .chart-header span,
+        .system-header span,
+        .alert-header span {
+            color: var(--pink);
+
+            font-size: 9px;
+            font-weight: 700;
+
+            letter-spacing: 2px;
+        }
+
+
+        .chart-header h2,
+        .system-header h2,
+        .alert-header h2 {
+            font-size: 17px;
+            margin-top: 5px;
+        }
+
+
+        .chart-container {
+            height: 280px;
+            margin-top: 25px;
+        }
+
+
+        /* ================= SYSTEM ================= */
+
+        .system-item {
+            display: flex;
+            align-items: center;
+
+            gap: 11px;
+
+            padding: 16px 0;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        .system-item:last-child {
+            border-bottom: none;
+        }
+
+
+        .system-icon {
+            width: 34px;
+            height: 34px;
+
+            border-radius: 8px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 12px;
+        }
+
+
+        .green {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--green);
+        }
+
+
+        .blue {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--blue);
+        }
+
+
+        .sky {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--sky);
+        }
+
+
+        .yellow {
+            background: rgba(250, 204, 21, 0.12);
+            color: var(--yellow);
+        }
+
+
+        .system-item div:nth-child(2) {
+            flex: 1;
+        }
+
+
+        .system-item strong {
+            display: block;
+            font-size: 10px;
+        }
+
+
+        .system-item span {
+            color: var(--muted);
+
+            font-size: 8px;
+
+            display: block;
+
+            margin-top: 3px;
+        }
+
+
+        .system-item b {
+            font-size: 7px;
+        }
+
+
+        .green-text {
+            color: var(--green);
+        }
+
+
+        .blue-text {
+            color: var(--blue);
+        }
+
+
+        .sky-text {
+            color: var(--sky);
+        }
+
+
+        .yellow-text {
+            color: var(--yellow);
+        }
+
+
+        /* ================= ALERT ================= */
+
+        .alert-card {
+            margin-bottom: 25px;
+        }
+
+
+        .alert-header {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 18px;
+        }
+
+
+        .view-btn {
+            background: transparent;
+
+            color: var(--pink);
+
+            border: 1px solid var(--pink);
+
+            border-radius: 7px;
+
+            padding: 7px 13px;
+
+            font-size: 9px;
+
+            cursor: pointer;
+        }
+
+
+        .view-btn:hover {
+            background: rgba(255, 20, 147, 0.1);
+        }
+
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+
+        th {
+            text-align: left;
+
+            color: var(--muted);
+
+            font-size: 8px;
+            letter-spacing: 1px;
+
+            padding: 11px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        td {
+            padding: 14px 11px;
+
+            font-size: 10px;
+
+            border-bottom: 1px solid var(--border);
+        }
+
+
+        td:last-child {
+            color: var(--muted);
+        }
+
+
+        .status {
+            padding: 5px 8px;
+
+            border-radius: 5px;
+
+            font-size: 7px;
+            font-weight: 700;
+        }
+
+
+        .status.warning {
+            background: rgba(250, 204, 21, 0.12);
+            color: var(--yellow);
+        }
+
+
+        .status.normal {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--green);
+        }
+
+
+        .status.danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--red);
+        }
+
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            display: flex;
+
+            justify-content: space-between;
+
+            color: var(--muted);
+
+            font-size: 8px;
+
+            padding: 5px 3px 20px;
+        }
+
+
+        footer span {
+            color: var(--pink);
+        }
+
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1000px) {
+
+            .sidebar {
+                width: 210px;
+            }
+
+            .main-content {
+                margin-left: 210px;
+                padding: 25px;
+            }
+
+            .sensor-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .danger-banner {
+                align-items: flex-start;
+            }
+
+            .threshold-info {
+                display: none;
+            }
+
+            footer {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                🌊
+            </div>
+
+            <div>
+
+                <h2>FloodGuard</h2>
+
+                <span>SMART MONITORING</span>
+
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <a href="#" class="nav-item active">
+                <span>▣</span>
+                Dashboard
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>◉</span>
+                Live Monitoring
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>◷</span>
+                Alert History
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>⌁</span>
+                Analytics
+            </a>
+
+            <a href="#" class="nav-item">
+                <span>⚙</span>
+                Settings
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="connection-box">
+
+                <div class="online-dot"></div>
+
+                <div>
+
+                    <strong>System Online</strong>
+
+                    <small>ESP32 Connected</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main-content">
+
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div>
+
+                <p class="small-title">
+                    REAL-TIME MONITORING
+                </p>
+
+                <h1>
+                    Flood Monitoring Dashboard
+                </h1>
+
+                <p class="subtitle">
+                    Monitor water levels and environmental conditions in real time.
+                </p>
+
+            </div>
+
+
+            <div class="header-right">
+
+                <div class="last-update">
+
+                    <span class="pulse"></span>
+
+                    Live
+
+                </div>
+
+
+                <div class="time-box">
+
+                    Last updated:
+
+                    <strong id="lastUpdated">
+                        --:--:--
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- ================= FLOOD STATUS ================= -->
+
+        <section class="danger-banner">
+
+            <div class="danger-icon">
+                !
+            </div>
+
+
+            <div class="danger-content">
+
+                <span class="danger-label">
+                    CURRENT FLOOD STATUS
+                </span>
+
+                <h2 id="floodStatus">
+                    LOADING
+                </h2>
+
+                <p id="statusMessage">
+                    Connecting to live monitoring system...
+                </p>
+
+            </div>
+
+
+            <div class="threshold-info">
+
+                <span>
+                    Danger Threshold
+                </span>
+
+                <strong>
+                    70%
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ENVIRONMENTAL MONITORING ================= -->
+
+        <section class="section-heading">
+
+            <span>
+                LIVE DATA
+            </span>
+
+            <h2>
+                Environmental Monitoring
+            </h2>
+
+        </section>
+
+
+        <section class="sensor-grid">
+
+
+            <!-- WATER -->
+
+            <div class="sensor-card">
+
+                <div class="card-top">
+
+                    <div class="sensor-icon water-icon">
+                        🌊
+                    </div>
+
+                    <span class="card-status">
+                        LIVE
+                    </span>
+
+                </div>
+
+
+                <div class="sensor-info">
+
+                    <p>
+                        Water Level
+                    </p>
+
+                    <h3>
+
+                        <span id="waterLevel">
+                            --
+                        </span>
+
+                        <small>
+                            %
+                        </small>
+
+                    </h3>
+
+                </div>
+
+
+                <div class="progress-container">
+
+                    <div class="progress-bar" id="waterProgress">
+                    </div>
+
+                </div>
+
+
+                <div class="card-footer">
+
+                    <span>
+                        Safe: 0–40%
+                    </span>
+
+                    <span>
+                        Danger: 70%+
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- TEMPERATURE -->
+
+            <div class="sensor-card">
+
+                <div class="card-top">
+
+                    <div class="sensor-icon temp-icon">
+                        🌡️
+                    </div>
+
+                    <span class="card-status">
+                        LIVE
+                    </span>
+
+                </div>
+
+
+                <div class="sensor-info">
+
+                    <p>
+                        Temperature
+                    </p>
+
+                    <h3>
+
+                        <span id="temperature">
+                            --
+                        </span>
+
+                        <small>
+                            °C
+                        </small>
+
+                    </h3>
+
+                </div>
+
+
+                <div class="mini-line">
+                    Environmental Temperature
+                </div>
+
+            </div>
+
+
+            <!-- HUMIDITY -->
+
+            <div class="sensor-card">
+
+                <div class="card-top">
+
+                    <div class="sensor-icon humidity-icon">
+                        💧
+                    </div>
+
+                    <span class="card-status">
+                        LIVE
+                    </span>
+
+                </div>
+
+
+                <div class="sensor-info">
+
+                    <p>
+                        Humidity
+                    </p>
+
+                    <h3>
+
+                        <span id="humidity">
+                            --
+                        </span>
+
+                        <small>
+                            %
+                        </small>
+
+                    </h3>
+
+                </div>
+
+
+                <div class="humidity-bar">
+
+                    <div class="humidity-fill" id="humidityProgress">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ================= CHART + SYSTEM ================= -->
+
+        <section class="dashboard-grid">
+
+
+            <!-- CHART -->
+
+            <div class="chart-card">
+
+                <div class="chart-header">
+
+                    <div>
+
+                        <span>
+                            WATER LEVEL TREND
+                        </span>
+
+                        <h2>
+                            Water Level Monitoring
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <canvas id="waterLevelChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- SYSTEM STATUS -->
+
+            <div class="system-card">
+
+                <div class="system-header">
+
+                    <span>
+                        SYSTEM HEALTH
+                    </span>
+
+                    <h2>
+                        System Status
+                    </h2>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-icon green">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ESP32
+                        </strong>
+
+                        <span>
+                            Connected
+                        </span>
+
+                    </div>
+
+                    <b class="green-text">
+                        ONLINE
+                    </b>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-icon blue">
+                        ☁
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Blynk Cloud
+                        </strong>
+
+                        <span>
+                            Data synchronized
+                        </span>
+
+                    </div>
+
+                    <b class="blue-text">
+                        ACTIVE
+                    </b>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-icon sky">
+                        ◉
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Water Sensor
+                        </strong>
+
+                        <span id="sensorStatusText">
+                            Reading normally
+                        </span>
+
+                    </div>
+
+                    <b class="sky-text">
+                        OK
+                    </b>
+
+                </div>
+
+
+                <div class="system-item">
+
+                    <div class="system-icon yellow">
+                        ⚡
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Power
+                        </strong>
+
+                        <span>
+                            Stable
+                        </span>
+
+                    </div>
+
+                    <b class="yellow-text">
+                        GOOD
+                    </b>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= ALERT HISTORY ================= -->
+
+        <section class="alert-card">
+
+            <div class="alert-header">
+
+                <div>
+
+                    <span>
+                        RECENT EVENTS
+                    </span>
+
+                    <h2>
+                        Alert History
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            TIME
+                        </th>
+
+                        <th>
+                            WATER LEVEL
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="alertTable">
+
+                    <tr>
+
+                        <td colspan="4">
+                            Waiting for live sensor data...
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- ================= FOOTER ================= -->
+
+        <footer>
+
+            <p>
+                FloodGuard • Smart Flood Monitoring & Early Warning System
+            </p>
+
+            <span>
+                ESP32 + Blynk + Flask + Web Dashboard
+            </span>
+
+        </footer>
+
+
+    </main>
+
+
+    <!-- IMPORTANT:
+         No dummy JavaScript here.
+         All JavaScript is inside script.js.
+    -->
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
