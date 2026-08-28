@@ -1,7 +1,7 @@
 
 #define BLYNK_TEMPLATE_ID "TMPL3Trxx6Ktn"
 #define BLYNK_TEMPLATE_NAME "Flood Monitoring System"
-#define BLYNK_AUTH_TOKEN "LtZYWXuWduCTTsEKuz7P8cb9uq78p8nq"
+#define BLYNK_AUTH_TOKEN "LtZYWXxxxxxxxxxxxxxxxxxxxxx"
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
